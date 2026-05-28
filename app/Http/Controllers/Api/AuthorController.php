@@ -4,17 +4,22 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Author;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class AuthorController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $authors = Author::paginate(10);
+        $perPage = max(1, (int) $request->input('per_page', 10));
+
+        $authors = Author::query()
+            ->orderByDesc('id')
+            ->paginate($perPage)
+            ->appends($request->query());
 
         return response()->json($authors);
     }
@@ -38,7 +43,18 @@ class AuthorController extends Controller
 
         $author = Author::create($validated);
 
-        return response()->json($author, 201);
+        return response()->json($this->normalizeAuthorPayload($author), 201);
+    }
+
+    private function normalizeAuthorPayload(Author $author): array
+    {
+        $payload = $author->toArray();
+
+        if ($author->birth_date) {
+            $payload['birth_date'] = $author->birth_date->format('Y-m-d');
+        }
+
+        return $payload;
     }
 
     /**
@@ -46,7 +62,7 @@ class AuthorController extends Controller
      */
     public function show(Author $author): JsonResponse
     {
-        return response()->json($author->load('books'));
+        return response()->json($this->normalizeAuthorPayload($author->load('books')));
     }
 
     /**
@@ -68,7 +84,7 @@ class AuthorController extends Controller
 
         $author->update($validated);
 
-        return response()->json($author);
+        return response()->json($this->normalizeAuthorPayload($author));
     }
 
     /**

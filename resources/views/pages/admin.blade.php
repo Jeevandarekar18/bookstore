@@ -105,6 +105,7 @@
                         <tbody id="admin-books-body" class="divide-y divide-stone-200 bg-white"></tbody>
                     </table>
                 </div>
+                <div id="book-pagination" class="mt-3 flex items-center justify-end gap-2"></div>
             </div>
 
             <div class="rounded-2xl border border-stone-200/80 bg-white p-5">
@@ -146,6 +147,7 @@
                         <tbody id="admin-authors-body" class="divide-y divide-stone-200 bg-white"></tbody>
                     </table>
                 </div>
+                <div id="author-pagination" class="mt-3 flex items-center justify-end gap-2"></div>
             </div>
         </div>
 

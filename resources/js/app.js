@@ -171,6 +171,7 @@ function initHomePage() {
 
     function renderBooks(response) {
         $grid.empty();
+        const isAdmin = Boolean(App.user && App.user.is_admin);
 
         if (!response.data || response.data.length === 0) {
             $status.html('<div class="rounded-2xl border border-dashed border-stone-300 bg-white p-5 text-sm text-stone-600">No books match your current search. Try a different keyword or filter.</div>');
@@ -184,6 +185,7 @@ function initHomePage() {
             const authorName = book.author?.name || 'Unknown author';
             const categoryName = book.category?.name || 'General';
             const inStock = Number(book.stock_quantity || 0) > 0;
+            const canAddToCart = !isAdmin && inStock;
 
             return `
                 <article class="group rounded-2xl border border-stone-200/80 bg-white p-4 shadow-sm shadow-stone-200/60 transition hover:-translate-y-0.5 hover:border-stone-300">
@@ -208,7 +210,7 @@ function initHomePage() {
 
                     <div class="mt-5 grid grid-cols-2 gap-2">
                         <button class="js-view-details rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-700" data-id="${book.id}">View details</button>
-                        <button class="js-add-to-cart rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500" data-id="${book.id}" ${!inStock ? 'disabled' : ''}>Add to cart</button>
+                        <button class="js-add-to-cart rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500" data-id="${book.id}" ${!canAddToCart ? 'disabled' : ''}>${canAddToCart ? 'Add to cart' : 'Add to cart'}</button>
                     </div>
                 </article>
             `;
@@ -289,6 +291,11 @@ function initHomePage() {
     });
 
     $(document).on('click', '.js-add-to-cart', function () {
+        if (App.user && App.user.is_admin) {
+            showToast('error', 'Admins cannot add books to cart.');
+            return;
+        }
+
         const bookId = Number($(this).data('id'));
         const cart = getCart();
         const existing = cart.find((item) => item.id === bookId);
@@ -338,6 +345,12 @@ function initHomePage() {
     $('#detail-modal-overlay').on('click', () => $('#detail-modal').addClass('hidden'));
 
     $('#detail-modal-add').on('click', function () {
+        if (App.user && App.user.is_admin) {
+            showToast('error', 'Admins cannot add books to cart.');
+            $('#detail-modal').addClass('hidden');
+            return;
+        }
+
         const bookId = Number($(this).data('id'));
         $(`.js-add-to-cart[data-id="${bookId}"]`).trigger('click');
         $('#detail-modal').addClass('hidden');
@@ -481,6 +494,11 @@ function initProfilePage() {
 }
 
 function initCartPage() {
+    if (App.user && App.user.is_admin) {
+        window.location.href = '/admin';
+        return;
+    }
+
     updateCartCount();
     const $items = $('#cart-items');
     const $summary = $('#cart-summary');
@@ -654,6 +672,9 @@ function initAdminPage() {
         return;
     }
 
+    let adminBookPage = 1;
+    let adminAuthorPage = 1;
+
     api('/user')
         .done((user) => {
             if (!user.is_admin) {
@@ -695,8 +716,31 @@ function initAdminPage() {
         loadAdminOrders();
     }
 
-    function loadAdminBooks() {
-        api('/books', { type: 'GET', data: { per_page: 100 } })
+    function renderAdminPagination(containerId, response, onPageClick, key) {
+        const $container = $(containerId);
+        $container.empty();
+
+        if (response.last_page <= 1) {
+            return;
+        }
+
+        const currentPage = Number(response.current_page);
+        const lastPage = Number(response.last_page);
+
+        const canGoPrev = currentPage > 1;
+        const canGoNext = currentPage < lastPage;
+
+        $container.append(`
+            <button class="js-${key}-page rounded-full border border-stone-300 px-3 py-1 text-sm ${canGoPrev ? 'bg-white text-stone-700' : 'cursor-not-allowed bg-stone-100 text-stone-400'}" data-page="${currentPage - 1}" ${canGoPrev ? '' : 'disabled'}>Prev</button>
+            <span class="rounded-full bg-stone-50 px-3 py-1 text-sm text-stone-700">Page ${currentPage} of ${lastPage}</span>
+            <button class="js-${key}-page rounded-full border border-stone-300 px-3 py-1 text-sm ${canGoNext ? 'bg-white text-stone-700' : 'cursor-not-allowed bg-stone-100 text-stone-400'}" data-page="${currentPage + 1}" ${canGoNext ? '' : 'disabled'}>Next</button>
+        `);
+    }
+
+    function loadAdminBooks(page = adminBookPage) {
+        adminBookPage = Number(page);
+
+        api('/books', { type: 'GET', data: { page: adminBookPage, per_page: 10, sort: '-id' } })
             .done((response) => {
                 $('#admin-books-body').empty().append((response.data || []).map((book) => `
                     <tr class="border-b border-stone-200/80">
@@ -711,11 +755,15 @@ function initAdminPage() {
                         </td>
                     </tr>
                 `).join(''));
+
+                renderAdminPagination('#book-pagination', response, loadAdminBooks, 'book');
             });
     }
 
-    function loadAdminAuthors() {
-        api('/authors', { type: 'GET', data: { per_page: 100 } })
+    function loadAdminAuthors(page = adminAuthorPage) {
+        adminAuthorPage = Number(page);
+
+        api('/authors', { type: 'GET', data: { page: adminAuthorPage, per_page: 10 } })
             .done((response) => {
                 $('#admin-authors-body').empty().append((response.data || []).map((author) => `
                     <tr class="border-b border-stone-200/80">
@@ -727,6 +775,8 @@ function initAdminPage() {
                         </td>
                     </tr>
                 `).join(''));
+
+                renderAdminPagination('#author-pagination', response, loadAdminAuthors, 'author');
             });
     }
 
@@ -744,6 +794,7 @@ function initAdminPage() {
                                 <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
                                 <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
                                 <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                                <option value="deny" ${order.status === 'deny' ? 'selected' : ''}>Denied</option>
                                 <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                             </select>
                         </td>
@@ -799,21 +850,50 @@ function initAdminPage() {
         });
     });
 
+    $(document).on('click', '.js-book-page', function (event) {
+        event.preventDefault();
+        loadAdminBooks(Number($(this).data('page')));
+    });
+
+    $(document).on('click', '.js-author-page', function (event) {
+        event.preventDefault();
+        loadAdminAuthors(Number($(this).data('page')));
+    });
+
+    function loadAdminFormOptions() {
+        return $.when(
+            api('/authors', { type: 'GET', data: { per_page: 100 } }),
+            api('/categories', { type: 'GET', data: { per_page: 100 } })
+        ).done((authorsResponse, categoriesResponse) => {
+            const authors = authorsResponse[0].data || [];
+            const categories = categoriesResponse[0].data || [];
+
+            $('#book-author').empty().append(authors.map((author) => `<option value="${author.id}">${author.name}</option>`).join(''));
+            $('#book-category').empty().append(categories.map((category) => `<option value="${category.id}">${category.name}</option>`).join(''));
+        });
+    }
+
     $(document).on('click', '.js-edit-book', function () {
         const bookId = Number($(this).data('id'));
-        api(`/books/${bookId}`)
-            .done((book) => {
-                $('#book-id').val(book.id);
-                $('#book-title').val(book.title);
-                $('#book-author').val(book.author_id);
-                $('#book-category').val(book.category_id);
-                $('#book-isbn').val(book.isbn);
-                $('#book-price').val(book.price);
-                $('#book-stock').val(book.stock_quantity);
-                $('#book-description').val(book.description || '');
-                $('#book-date').val(book.published_date);
-                $('#book-book-tab').trigger('click');
-            });
+        loadAdminFormOptions().done(() => {
+            api(`/books/${bookId}`)
+                .done((book) => {
+                    $('#book-id').val(book.id);
+                    $('#book-title').val(book.title);
+                    $('#book-author').val(String(book.author_id));
+                    $('#book-category').val(String(book.category_id));
+                    $('#book-isbn').val(book.isbn);
+                    $('#book-price').val(book.price);
+                    $('#book-stock').val(book.stock_quantity);
+                    $('#book-description').val(book.description || '');
+                    $('#book-date').val(book.published_date || '');
+
+                    document.getElementById('book-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                })
+                .fail((xhr) => {
+                    showToast('error', xhr.responseJSON?.message || 'Unable to load book for editing.');
+                });
+        });
     });
 
     $(document).on('click', '.js-delete-book', function () {
@@ -837,7 +917,11 @@ function initAdminPage() {
                 $('#author-name').val(author.name);
                 $('#author-bio').val(author.bio || '');
                 $('#author-birth-date').val(author.birth_date || '');
-                $('#author-author-tab').trigger('click');
+
+                document.getElementById('author-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            })
+            .fail((xhr) => {
+                showToast('error', xhr.responseJSON?.message || 'Unable to load author for editing.');
             });
     });
 

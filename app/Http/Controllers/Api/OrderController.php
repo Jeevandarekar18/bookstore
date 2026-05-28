@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class OrderController extends Controller
 {
@@ -14,6 +15,8 @@ class OrderController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $perPage = max(1, (int) $request->input('per_page', 10));
+
         $query = Order::with(['user', 'orderItems.book']);
 
         // Filter by user unless admin
@@ -26,7 +29,7 @@ class OrderController extends Controller
             $query->where('status', $request->status);
         }
 
-        $orders = $query->latest()->paginate(10);
+        $orders = $query->latest()->paginate($perPage)->appends($request->query());
 
         return response()->json($orders);
     }
@@ -67,7 +70,7 @@ class OrderController extends Controller
      */
     public function show(Order $order): JsonResponse
     {
-        $this->authorize('view', $order); // Assuming policy
+        Gate::authorize('view', $order);
 
         return response()->json($order->load(['user', 'orderItems.book']));
     }
@@ -77,11 +80,15 @@ class OrderController extends Controller
      */
     public function update(Request $request, Order $order): JsonResponse
     {
-        $this->authorize('update', $order);
+        Gate::authorize('update', $order);
 
         $validated = $request->validate([
-            'status' => 'sometimes|in:pending,processing,shipped,delivered,cancelled',
+            'status' => 'sometimes|in:pending,processing,shipped,delivered,cancelled,deny',
         ]);
+
+        if (isset($validated['status']) && $validated['status'] === 'deny') {
+            $validated['status'] = 'cancelled';
+        }
 
         $order->update($validated);
 
@@ -93,7 +100,7 @@ class OrderController extends Controller
      */
     public function destroy(Order $order): JsonResponse
     {
-        $this->authorize('delete', $order);
+        Gate::authorize('delete', $order);
 
         $order->delete();
 

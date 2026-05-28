@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Book;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -30,7 +30,7 @@ class BookController extends Controller
                     ->orWhereHas('author', fn ($query) => $query->where('name', 'like', "%{$value}%"))
                     ->orWhereHas('category', fn ($query) => $query->where('name', 'like', "%{$value}%")))
             )
-            ->allowedSorts('title', 'price', 'published_date')
+            ->allowedSorts('id', 'title', 'price', 'published_date')
             ->defaultSort('title')
             ->with(['author', 'category'])
             ->paginate($perPage)
@@ -63,7 +63,22 @@ class BookController extends Controller
 
         $book = Book::create($validated);
 
-        return response()->json($book->load(['author', 'category']), 201);
+        return response()->json($this->normalizeBookPayload($book->load(['author', 'category'])), 201);
+    }
+
+    private function normalizeBookPayload(Book $book): array
+    {
+        $payload = $book->load(['author', 'category'])->toArray();
+
+        if ($book->published_date) {
+            $payload['published_date'] = $book->published_date->format('Y-m-d');
+        }
+
+        if ($book->author && $book->author->birth_date) {
+            $payload['author']['birth_date'] = $book->author->birth_date->format('Y-m-d');
+        }
+
+        return $payload;
     }
 
     /**
@@ -71,7 +86,7 @@ class BookController extends Controller
      */
     public function show(Book $book): JsonResponse
     {
-        return response()->json($book->load(['author', 'category']));
+        return response()->json($this->normalizeBookPayload($book));
     }
 
     /**
@@ -89,7 +104,7 @@ class BookController extends Controller
             'title' => 'sometimes|required|string|max:255',
             'author_id' => 'sometimes|required|exists:authors,id',
             'category_id' => 'sometimes|required|exists:categories,id',
-            'isbn' => 'sometimes|required|string|unique:books,isbn,' . $book->id,
+            'isbn' => 'sometimes|required|string|unique:books,isbn,'.$book->id,
             'price' => 'sometimes|required|numeric|min:0',
             'stock_quantity' => 'sometimes|required|integer|min:0',
             'description' => 'nullable|string',
@@ -98,7 +113,7 @@ class BookController extends Controller
 
         $book->update($validated);
 
-        return response()->json($book->load(['author', 'category']));
+        return response()->json($this->normalizeBookPayload($book->load(['author', 'category'])));
     }
 
     /**
