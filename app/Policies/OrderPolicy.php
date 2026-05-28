@@ -7,6 +7,15 @@ use App\Models\User;
 
 class OrderPolicy
 {
+    public function before(User $user, string $ability): ?bool
+    {
+        if ($user->is_admin) {
+            return true;
+        }
+
+        return null;
+    }
+
     /**
      * Determine whether the user can view the model.
      */

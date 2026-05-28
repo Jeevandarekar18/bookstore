@@ -16,8 +16,8 @@ class OrderController extends Controller
     {
         $query = Order::with(['user', 'orderItems.book']);
 
-        // Filter by user if authenticated
-        if ($request->user()) {
+        // Filter by user unless admin
+        if ($request->user() && ! $request->user()->is_admin) {
             $query->where('user_id', $request->user()->id);
         }
 
@@ -26,7 +26,7 @@ class OrderController extends Controller
             $query->where('status', $request->status);
         }
 
-        $orders = $query->paginate(10);
+        $orders = $query->latest()->paginate(10);
 
         return response()->json($orders);
     }
@@ -36,6 +36,8 @@ class OrderController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        $user = $request->user();
+
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'total_amount' => 'required|numeric|min:0',
@@ -46,6 +48,10 @@ class OrderController extends Controller
             'order_items.*.quantity' => 'required|integer|min:1',
             'order_items.*.price' => 'required|numeric|min:0',
         ]);
+
+        if ($user && (int) $validated['user_id'] !== $user->id) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
 
         $order = Order::create($validated);
 

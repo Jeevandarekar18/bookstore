@@ -16,11 +16,13 @@ class BookController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $perPage = max(1, (int) $request->input('per_page', 12));
+
         $books = QueryBuilder::for(Book::class)
             ->allowedIncludes('author', 'category')
             ->allowedFilters(
                 AllowedFilter::partial('title'),
-                AllowedFilter::partial('description'),pspi
+                AllowedFilter::partial('description'),
                 AllowedFilter::exact('author_id'),
                 AllowedFilter::exact('category_id'),
                 AllowedFilter::callback('search', fn ($query, $value) => $query
@@ -31,7 +33,7 @@ class BookController extends Controller
             ->allowedSorts('title', 'price', 'published_date')
             ->defaultSort('title')
             ->with(['author', 'category'])
-            ->paginate(10)
+            ->paginate($perPage)
             ->appends($request->query());
 
         return response()->json($books);
@@ -42,6 +44,12 @@ class BookController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        $user = $request->user();
+
+        if (! $user || ! $user->is_admin) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'author_id' => 'required|exists:authors,id',
@@ -71,6 +79,12 @@ class BookController extends Controller
      */
     public function update(Request $request, Book $book): JsonResponse
     {
+        $user = $request->user();
+
+        if (! $user || ! $user->is_admin) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
             'author_id' => 'sometimes|required|exists:authors,id',
@@ -90,8 +104,14 @@ class BookController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Book $book): JsonResponse
+    public function destroy(Request $request, Book $book): JsonResponse
     {
+        $user = $request->user();
+
+        if (! $user || ! $user->is_admin) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $book->delete();
 
         return response()->json(['message' => 'Book deleted successfully']);

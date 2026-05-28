@@ -24,6 +24,12 @@ class AuthorController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        $user = $request->user();
+
+        if (! $user || ! $user->is_admin) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'bio' => 'nullable|string',
@@ -48,6 +54,12 @@ class AuthorController extends Controller
      */
     public function update(Request $request, Author $author): JsonResponse
     {
+        $user = $request->user();
+
+        if (! $user || ! $user->is_admin) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'bio' => 'nullable|string',
@@ -62,8 +74,14 @@ class AuthorController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Author $author): JsonResponse
+    public function destroy(Request $request, Author $author): JsonResponse
     {
+        $user = $request->user();
+
+        if (! $user || ! $user->is_admin) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
         $author->delete();
 
         return response()->json(['message' => 'Author deleted successfully']);
