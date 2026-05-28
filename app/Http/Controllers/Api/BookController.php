@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Book;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class BookController extends Controller
 {
@@ -14,31 +16,23 @@ class BookController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Book::with(['author', 'category']);
-
-        // Search functionality
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where('title', 'like', "%{$search}%")
-                  ->orWhereHas('author', function ($q) use ($search) {
-                      $q->where('name', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('category', function ($q) use ($search) {
-                      $q->where('name', 'like', "%{$search}%");
-                  });
-        }
-
-        // Filter by category
-        if ($request->has('category_id')) {
-            $query->where('category_id', $request->category_id);
-        }
-
-        // Filter by author
-        if ($request->has('author_id')) {
-            $query->where('author_id', $request->author_id);
-        }
-
-        $books = $query->paginate(10);
+        $books = QueryBuilder::for(Book::class)
+            ->allowedIncludes('author', 'category')
+            ->allowedFilters(
+                AllowedFilter::partial('title'),
+                AllowedFilter::partial('description'),pspi
+                AllowedFilter::exact('author_id'),
+                AllowedFilter::exact('category_id'),
+                AllowedFilter::callback('search', fn ($query, $value) => $query
+                    ->where('title', 'like', "%{$value}%")
+                    ->orWhereHas('author', fn ($query) => $query->where('name', 'like', "%{$value}%"))
+                    ->orWhereHas('category', fn ($query) => $query->where('name', 'like', "%{$value}%")))
+            )
+            ->allowedSorts('title', 'price', 'published_date')
+            ->defaultSort('title')
+            ->with(['author', 'category'])
+            ->paginate(10)
+            ->appends($request->query());
 
         return response()->json($books);
     }
