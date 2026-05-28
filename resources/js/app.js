@@ -159,12 +159,12 @@ function initHomePage() {
 
     function renderSkeletons() {
         $grid.html(Array.from({ length: 6 }).map(() => `
-            <div class="rounded-3xl border border-white/10 bg-slate-900/80 p-5 animate-pulse">
-                <div class="h-40 rounded-2xl bg-slate-700/80"></div>
-                <div class="mt-4 h-4 w-3/4 rounded bg-slate-700"></div>
-                <div class="mt-2 h-3 w-1/2 rounded bg-slate-700"></div>
-                <div class="mt-4 h-3 w-full rounded bg-slate-700"></div>
-                <div class="mt-8 h-10 rounded-2xl bg-slate-700"></div>
+            <div class="rounded-2xl border border-stone-200/80 bg-stone-50 p-4 animate-pulse">
+                <div class="h-36 rounded-xl bg-stone-200"></div>
+                <div class="mt-4 h-4 w-3/4 rounded bg-stone-200"></div>
+                <div class="mt-2 h-3 w-1/2 rounded bg-stone-200"></div>
+                <div class="mt-4 h-3 w-full rounded bg-stone-200"></div>
+                <div class="mt-6 h-9 rounded-xl bg-stone-200"></div>
             </div>
         `).join(''));
     }
@@ -173,7 +173,7 @@ function initHomePage() {
         $grid.empty();
 
         if (!response.data || response.data.length === 0) {
-            $status.html('<div class="rounded-2xl border border-dashed border-white/10 bg-slate-900/80 p-6 text-slate-300">No books match your current search. Try a different keyword or filter.</div>');
+            $status.html('<div class="rounded-2xl border border-dashed border-stone-300 bg-white p-5 text-sm text-stone-600">No books match your current search. Try a different keyword or filter.</div>');
             $pagination.empty();
             return;
         }
@@ -186,29 +186,29 @@ function initHomePage() {
             const inStock = Number(book.stock_quantity || 0) > 0;
 
             return `
-                <article class="group rounded-3xl border border-white/10 bg-slate-900/80 p-5 shadow-lg shadow-cyan-950/10 transition-transform hover:-translate-y-1">
-                    <div class="flex items-start justify-between">
+                <article class="group rounded-2xl border border-stone-200/80 bg-white p-4 shadow-sm shadow-stone-200/60 transition hover:-translate-y-0.5 hover:border-stone-300">
+                    <div class="flex items-start justify-between gap-3">
                         <div>
-                            <p class="rounded-full bg-cyan-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-200">${categoryName}</p>
-                            <h3 class="mt-3 text-xl font-semibold text-white">${book.title}</h3>
-                            <p class="mt-1 text-sm text-slate-300">by ${authorName}</p>
+                            <p class="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-700">${categoryName}</p>
+                            <h3 class="mt-3 text-lg font-semibold text-stone-900">${book.title}</h3>
+                            <p class="mt-1 text-sm text-stone-600">by ${authorName}</p>
                         </div>
-                        <div class="rounded-2xl bg-slate-800 px-3 py-2 text-right">
-                            <div class="text-lg font-semibold text-white">${formatCurrency(book.price)}</div>
-                            <div class="text-[10px] uppercase tracking-[0.2em] text-slate-400">${inStock ? 'In stock' : 'Out of stock'}</div>
+                        <div class="rounded-xl bg-stone-50 px-2.5 py-2 text-right">
+                            <div class="text-base font-semibold text-stone-900">${formatCurrency(book.price)}</div>
+                            <div class="text-[10px] uppercase tracking-[0.2em] text-stone-500">${inStock ? 'In stock' : 'Out of stock'}</div>
                         </div>
                     </div>
 
-                    <p class="mt-4 line-clamp-3 text-sm text-slate-300">${book.description || 'A great addition to your reading list.'}</p>
+                    <p class="mt-4 line-clamp-3 text-sm text-stone-600">${book.description || 'A great addition to your reading list.'}</p>
 
-                    <div class="mt-4 flex items-center justify-between text-xs text-slate-400">
+                    <div class="mt-4 flex items-center justify-between text-xs text-stone-500">
                         <span>${book.author?.name || 'Author'} • ISBN ${book.isbn}</span>
                         <span>${book.stock_quantity} left</span>
                     </div>
 
                     <div class="mt-5 grid grid-cols-2 gap-2">
-                        <button class="js-view-details rounded-2xl bg-slate-800 px-3 py-2 text-sm font-medium text-slate-100 hover:bg-slate-700" data-id="${book.id}">View details</button>
-                        <button class="js-add-to-cart rounded-2xl bg-cyan-500 px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400" data-id="${book.id}" ${!inStock ? 'disabled' : ''}>Add to cart</button>
+                        <button class="js-view-details rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-700" data-id="${book.id}">View details</button>
+                        <button class="js-add-to-cart rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500" data-id="${book.id}" ${!inStock ? 'disabled' : ''}>Add to cart</button>
                     </div>
                 </article>
             `;
@@ -217,7 +217,7 @@ function initHomePage() {
         $pagination.empty();
         if (response.last_page > 1) {
             for (let page = 1; page <= response.last_page; page++) {
-                $pagination.append(`<button class="rounded-full border border-white/10 px-3 py-1 text-sm ${page === response.current_page ? 'bg-cyan-500 text-slate-950' : 'bg-slate-900 text-slate-200'}" data-page="${page}">${page}</button>`);
+                $pagination.append(`<button class="rounded-full border border-stone-300 px-3 py-1 text-sm ${page === response.current_page ? 'bg-blue-600 text-white' : 'bg-white text-stone-700'}" data-page="${page}">${page}</button>`);
             }
         }
     }
@@ -419,20 +419,20 @@ function initProfilePage() {
             $('#profile-recent-orders').empty();
 
             if (orders.length === 0) {
-                $('#profile-recent-orders').append('<div class="rounded-2xl border border-white/10 bg-slate-950/80 p-4 text-slate-300">No orders yet. Start shopping to see your recent purchases.</div>');
+                $('#profile-recent-orders').append('<div class="rounded-2xl border border-stone-200/80 bg-stone-50 p-4 text-sm text-stone-600">No orders yet. Start shopping to see your recent purchases.</div>');
                 return;
             }
 
             $('#profile-recent-orders').append(orders.slice(0, 3).map((order) => `
-                <div class="rounded-2xl border border-white/10 bg-slate-950/80 p-4">
+                <div class="rounded-2xl border border-stone-200/80 bg-stone-50 p-4">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-semibold text-white">Order #${order.id}</p>
-                            <p class="text-xs text-slate-400">${new Date(order.order_date).toLocaleDateString()}</p>
+                            <p class="text-sm font-semibold text-stone-900">Order #${order.id}</p>
+                            <p class="text-xs text-stone-500">${new Date(order.order_date).toLocaleDateString()}</p>
                         </div>
-                        <span class="rounded-full bg-cyan-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-200">${order.status}</span>
+                        <span class="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-700">${order.status}</span>
                     </div>
-                    <p class="mt-3 text-sm text-slate-300">${order.order_items?.length || 0} items • ${formatCurrency(order.total_amount)}</p>
+                    <p class="mt-3 text-sm text-stone-600">${order.order_items?.length || 0} items • ${formatCurrency(order.total_amount)}</p>
                 </div>
             `).join(''));
         });
@@ -489,47 +489,47 @@ function initCartPage() {
         const cart = getCart();
 
         if (cart.length === 0) {
-            $items.html('<div class="rounded-3xl border border-dashed border-white/10 bg-slate-900/80 p-8 text-center text-slate-300">Your cart is empty. Browse books and add your favorites.</div>');
-            $summary.html('<div class="rounded-3xl border border-white/10 bg-slate-900/80 p-5 text-slate-300">Your cart is empty.</div>');
+            $items.html('<div class="rounded-2xl border border-dashed border-stone-300 bg-white p-6 text-center text-sm text-stone-600">Your cart is empty. Browse books and add your favorites.</div>');
+            $summary.html('<div class="rounded-2xl border border-stone-200/80 bg-white p-4 text-sm text-stone-600">Your cart is empty.</div>');
             return;
         }
 
         const total = cart.reduce((sum, item) => sum + (Number(item.price) * Number(item.quantity)), 0);
 
         $items.empty().append(cart.map((item) => `
-            <div class="rounded-3xl border border-white/10 bg-slate-900/80 p-5">
+            <div class="rounded-2xl border border-stone-200/80 bg-white p-4">
                 <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <p class="text-lg font-semibold text-white">${item.title}</p>
-                        <p class="mt-1 text-sm text-slate-300">by ${item.author}</p>
-                        <p class="mt-2 text-sm text-cyan-200">${formatCurrency(item.price)} each</p>
+                        <p class="text-lg font-semibold text-stone-900">${item.title}</p>
+                        <p class="mt-1 text-sm text-stone-600">by ${item.author}</p>
+                        <p class="mt-2 text-sm text-blue-700">${formatCurrency(item.price)} each</p>
                     </div>
 
                     <div class="flex items-center gap-3">
-                        <button class="js-decrease-cart rounded-full border border-white/10 px-3 py-1 text-white" data-id="${item.id}">−</button>
-                        <span class="min-w-10 text-center text-white">${item.quantity}</span>
-                        <button class="js-increase-cart rounded-full border border-white/10 px-3 py-1 text-white" data-id="${item.id}">+</button>
-                        <button class="js-remove-cart rounded-full bg-rose-500/20 px-3 py-1 text-sm font-medium text-rose-200" data-id="${item.id}">Remove</button>
+                        <button class="js-decrease-cart rounded-full border border-stone-300 px-3 py-1 text-stone-700" data-id="${item.id}">−</button>
+                        <span class="min-w-10 text-center text-stone-900">${item.quantity}</span>
+                        <button class="js-increase-cart rounded-full border border-stone-300 px-3 py-1 text-stone-700" data-id="${item.id}">+</button>
+                        <button class="js-remove-cart rounded-full bg-rose-50 px-3 py-1 text-sm font-medium text-rose-700" data-id="${item.id}">Remove</button>
                     </div>
                 </div>
             </div>
         `).join(''));
 
         $summary.html(`
-            <div class="rounded-3xl border border-white/10 bg-slate-900/80 p-5">
-                <div class="flex items-center justify-between text-slate-300">
+            <div class="rounded-2xl border border-stone-200/80 bg-white p-4">
+                <div class="flex items-center justify-between text-stone-600">
                     <span>Subtotal</span>
                     <span>${formatCurrency(total)}</span>
                 </div>
-                <div class="mt-3 flex items-center justify-between text-slate-300">
+                <div class="mt-3 flex items-center justify-between text-stone-600">
                     <span>Shipping</span>
                     <span>${formatCurrency(0)}</span>
                 </div>
-                <div class="mt-4 border-t border-white/10 pt-4 flex items-center justify-between text-lg font-semibold text-white">
+                <div class="mt-4 border-t border-stone-200 pt-4 flex items-center justify-between text-lg font-semibold text-stone-900">
                     <span>Total</span>
                     <span>${formatCurrency(total)}</span>
                 </div>
-                <button id="checkout-button" class="mt-5 w-full rounded-2xl bg-cyan-500 px-4 py-3 font-semibold text-slate-950">Place order</button>
+                <button id="checkout-button" class="mt-5 w-full rounded-xl bg-blue-600 px-4 py-2.5 font-semibold text-white">Place order</button>
             </div>
         `);
     }
@@ -619,25 +619,25 @@ function initOrdersPage() {
             $('#orders-list').empty();
 
             if (orders.length === 0) {
-                $('#orders-list').append('<div class="rounded-3xl border border-dashed border-white/10 bg-slate-900/80 p-8 text-slate-300">You have not placed any orders yet.</div>');
+                $('#orders-list').append('<div class="rounded-2xl border border-dashed border-stone-300 bg-white p-6 text-sm text-stone-600">You have not placed any orders yet.</div>');
                 return;
             }
 
             $('#orders-list').append(orders.map((order) => `
-                <article class="rounded-3xl border border-white/10 bg-slate-900/80 p-5">
+                <article class="rounded-2xl border border-stone-200/80 bg-white p-4">
                     <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                         <div>
-                            <p class="text-lg font-semibold text-white">Order #${order.id}</p>
-                            <p class="text-sm text-slate-400">${new Date(order.order_date).toLocaleString()}</p>
+                            <p class="text-lg font-semibold text-stone-900">Order #${order.id}</p>
+                            <p class="text-sm text-stone-500">${new Date(order.order_date).toLocaleString()}</p>
                         </div>
                         <div class="flex items-center gap-3">
-                            <span class="rounded-full bg-cyan-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">${order.status}</span>
-                            <span class="rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-200">${formatCurrency(order.total_amount)}</span>
+                            <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">${order.status}</span>
+                            <span class="rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-700">${formatCurrency(order.total_amount)}</span>
                         </div>
                     </div>
                     <div class="mt-4 space-y-2">
                         ${(order.order_items || []).map((item) => `
-                            <div class="flex items-center justify-between rounded-2xl bg-slate-950/80 px-3 py-2 text-sm text-slate-300">
+                            <div class="flex items-center justify-between rounded-xl bg-stone-50 px-3 py-2 text-sm text-stone-700">
                                 <span>${item.book?.title || 'Book'} × ${item.quantity}</span>
                                 <span>${formatCurrency(item.price * item.quantity)}</span>
                             </div>
@@ -674,17 +674,17 @@ function initAdminPage() {
                 $('#stats-pending').text(data.summary.pending_orders);
 
                 $('#status-breakdown').empty().append(Object.entries(data.status_breakdown || {}).map(([status, total]) => `
-                    <div class="rounded-2xl bg-slate-950/80 px-3 py-2 text-sm text-white">${status}: ${total}</div>
+                    <div class="rounded-xl bg-stone-50 px-3 py-2 text-sm text-stone-700">${status}: ${total}</div>
                 `).join(''));
 
                 $('#recent-orders').empty().append((data.recent_orders || []).map((order) => `
-                    <div class="rounded-2xl border border-white/10 bg-slate-950/80 p-4">
+                    <div class="rounded-2xl border border-stone-200/80 bg-white p-4">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-semibold text-white">Order #${order.id}</p>
-                                <p class="text-xs text-slate-400">${order.user?.name || 'Customer'} • ${new Date(order.order_date).toLocaleString()}</p>
+                                <p class="text-sm font-semibold text-stone-900">Order #${order.id}</p>
+                                <p class="text-xs text-stone-500">${order.user?.name || 'Customer'} • ${new Date(order.order_date).toLocaleString()}</p>
                             </div>
-                            <span class="rounded-full bg-cyan-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-200">${order.status}</span>
+                            <span class="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-700">${order.status}</span>
                         </div>
                     </div>
                 `).join(''));
@@ -699,15 +699,15 @@ function initAdminPage() {
         api('/books', { type: 'GET', data: { per_page: 100 } })
             .done((response) => {
                 $('#admin-books-body').empty().append((response.data || []).map((book) => `
-                    <tr class="border-b border-white/5">
-                        <td class="px-4 py-3 text-sm text-white">${book.title}</td>
-                        <td class="px-4 py-3 text-sm text-slate-300">${book.author?.name || 'Unknown'}</td>
-                        <td class="px-4 py-3 text-sm text-slate-300">${book.category?.name || 'General'}</td>
-                        <td class="px-4 py-3 text-sm text-slate-300">${book.stock_quantity}</td>
-                        <td class="px-4 py-3 text-sm text-slate-300">${formatCurrency(book.price)}</td>
-                        <td class="px-4 py-3 text-right text-sm">
-                            <button class="js-edit-book rounded-full bg-slate-800 px-3 py-1 text-white" data-id="${book.id}">Edit</button>
-                            <button class="js-delete-book rounded-full bg-rose-500/20 px-3 py-1 text-rose-200" data-id="${book.id}">Delete</button>
+                    <tr class="border-b border-stone-200/80">
+                        <td class="px-3 py-2.5 text-sm text-stone-900">${book.title}</td>
+                        <td class="px-3 py-2.5 text-sm text-stone-600">${book.author?.name || 'Unknown'}</td>
+                        <td class="px-3 py-2.5 text-sm text-stone-600">${book.category?.name || 'General'}</td>
+                        <td class="px-3 py-2.5 text-sm text-stone-600">${book.stock_quantity}</td>
+                        <td class="px-3 py-2.5 text-sm text-stone-600">${formatCurrency(book.price)}</td>
+                        <td class="px-3 py-2.5 text-right text-sm">
+                            <button class="js-edit-book rounded-full bg-stone-100 px-3 py-1 text-stone-700" data-id="${book.id}">Edit</button>
+                            <button class="js-delete-book rounded-full bg-rose-50 px-3 py-1 text-rose-700" data-id="${book.id}">Delete</button>
                         </td>
                     </tr>
                 `).join(''));
@@ -718,12 +718,12 @@ function initAdminPage() {
         api('/authors', { type: 'GET', data: { per_page: 100 } })
             .done((response) => {
                 $('#admin-authors-body').empty().append((response.data || []).map((author) => `
-                    <tr class="border-b border-white/5">
-                        <td class="px-4 py-3 text-sm text-white">${author.name}</td>
-                        <td class="px-4 py-3 text-sm text-slate-300">${author.bio || '—'}</td>
-                        <td class="px-4 py-3 text-right text-sm">
-                            <button class="js-edit-author rounded-full bg-slate-800 px-3 py-1 text-white" data-id="${author.id}">Edit</button>
-                            <button class="js-delete-author rounded-full bg-rose-500/20 px-3 py-1 text-rose-200" data-id="${author.id}">Delete</button>
+                    <tr class="border-b border-stone-200/80">
+                        <td class="px-3 py-2.5 text-sm text-stone-900">${author.name}</td>
+                        <td class="px-3 py-2.5 text-sm text-stone-600">${author.bio || '—'}</td>
+                        <td class="px-3 py-2.5 text-right text-sm">
+                            <button class="js-edit-author rounded-full bg-stone-100 px-3 py-1 text-stone-700" data-id="${author.id}">Edit</button>
+                            <button class="js-delete-author rounded-full bg-rose-50 px-3 py-1 text-rose-700" data-id="${author.id}">Delete</button>
                         </td>
                     </tr>
                 `).join(''));
@@ -734,12 +734,12 @@ function initAdminPage() {
         api('/orders', { type: 'GET', data: { per_page: 100 } })
             .done((response) => {
                 $('#admin-orders-body').empty().append((response.data || []).map((order) => `
-                    <tr class="border-b border-white/5">
-                        <td class="px-4 py-3 text-sm text-white">#${order.id}</td>
-                        <td class="px-4 py-3 text-sm text-slate-300">${order.user?.name || 'Customer'}</td>
-                        <td class="px-4 py-3 text-sm text-slate-300">${formatCurrency(order.total_amount)}</td>
-                        <td class="px-4 py-3 text-sm">
-                            <select class="status-select rounded-xl bg-slate-800 px-2 py-1 text-white" data-order-id="${order.id}">
+                    <tr class="border-b border-stone-200/80">
+                        <td class="px-3 py-2.5 text-sm text-stone-900">#${order.id}</td>
+                        <td class="px-3 py-2.5 text-sm text-stone-600">${order.user?.name || 'Customer'}</td>
+                        <td class="px-3 py-2.5 text-sm text-stone-600">${formatCurrency(order.total_amount)}</td>
+                        <td class="px-3 py-2.5 text-sm">
+                            <select class="status-select rounded-xl border border-stone-300 bg-white px-2 py-1 text-sm text-stone-700" data-order-id="${order.id}">
                                 <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
                                 <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
                                 <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>

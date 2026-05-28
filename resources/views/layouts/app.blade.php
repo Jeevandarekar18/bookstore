@@ -1,52 +1,52 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-950">
+<html lang="en" class="h-full bg-[#f8f5f1]">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookstore</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-full bg-slate-950 text-white" data-page="{{ $page ?? 'home' }}">
-    <div class="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(14,116,144,0.2),_transparent_30%),linear-gradient(180deg,#020617,#020617_25%,#020817)]">
-        <header class="sticky top-0 z-30 border-b border-white/10 bg-slate-950/80 backdrop-blur">
-            <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-                <a href="/" class="flex items-center gap-3">
-                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500 text-lg font-bold text-slate-950">B</div>
+<body class="min-h-full bg-stone-50 text-[#2f241f]" data-page="{{ $page ?? 'home' }}">
+    <div class="min-h-screen bg-white/70">
+        <header class="sticky top-0 z-30 border-b border-stone-200/80 bg-white/90 backdrop-blur">
+            <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+                <a href="/" class="flex items-center gap-2.5">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">B</div>
                     <div>
-                        <p class="text-lg font-semibold text-white">Bookstore</p>
-                        <p class="text-[10px] uppercase tracking-[0.28em] text-cyan-200">Curated reads</p>
+                        <p class="text-base font-semibold text-stone-900">Bookstore</p>
+                        <p class="text-[9px] uppercase tracking-[0.28em] text-blue-700">Curated reads</p>
                     </div>
                 </a>
 
-                <nav class="hidden items-center gap-6 text-sm text-slate-300 md:flex">
-                    <a href="/" class="transition hover:text-white">Home</a>
-                    <a href="/cart" class="transition hover:text-white">Cart</a>
-                    <a href="/orders" class="transition hover:text-white">Orders</a>
-                    <a href="/profile" class="transition hover:text-white">Profile</a>
-                    <a id="admin-link" href="/admin" class="hidden transition hover:text-white">Admin</a>
+                <nav class="hidden items-center gap-5 text-sm text-stone-600 md:flex">
+                    <a href="/" class="transition hover:text-stone-900">Home</a>
+                    <a href="/cart" class="transition hover:text-stone-900">Cart</a>
+                    <a href="/orders" class="transition hover:text-stone-900">Orders</a>
+                    <a href="/profile" class="transition hover:text-stone-900">Profile</a>
+                    <a id="admin-link" href="/admin" class="hidden transition hover:text-stone-900">Admin</a>
                 </nav>
 
-                <div class="flex items-center gap-3">
-                    <a href="/cart" class="relative rounded-full border border-white/10 px-3 py-2 text-sm text-white">
-                        Cart <span id="cart-badge" class="ml-2 rounded-full bg-cyan-500 px-2 py-0.5 text-[10px] font-bold text-slate-950">0</span>
+                <div class="flex items-center gap-2.5">
+                    <a href="/cart" class="relative rounded-full border border-stone-300 px-2.5 py-1.5 text-xs font-medium text-stone-700">
+                        Cart <span id="cart-badge" class="ml-2 rounded-full bg-blue-600 px-1.5 py-0.5 text-[9px] font-bold text-white">0</span>
                     </a>
 
                     <div id="auth-menu-logged-out" class="flex items-center gap-2">
-                        <a href="/login" class="rounded-full border border-white/10 px-3 py-2 text-sm font-medium text-white">Login</a>
-                        <a href="/register" class="rounded-full bg-cyan-500 px-3 py-2 text-sm font-semibold text-slate-950">Register</a>
+                        <a href="/login" class="rounded-full border border-stone-300 px-2.5 py-1.5 text-xs font-medium text-stone-700">Login</a>
+                        <a href="/register" class="rounded-full bg-blue-600 px-2.5 py-1.5 text-xs font-semibold text-white">Register</a>
                     </div>
 
                     <div id="auth-menu-logged-in" class="hidden items-center gap-2">
-                        <div class="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-xs font-semibold text-cyan-100">
+                        <div class="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-[10px] font-semibold text-blue-700">
                             <span id="user-label">Account</span>
                         </div>
-                        <button id="logout-button" class="rounded-full bg-rose-500/20 px-3 py-2 text-sm font-semibold text-rose-100">Logout</button>
+                        <button id="logout-button" class="rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-700">Logout</button>
                     </div>
                 </div>
             </div>
         </header>
 
-        <main class="mx-auto max-w-7xl px-4 py-6">
+        <main class="mx-auto max-w-7xl px-4 py-4">
             @yield('content')
         </main>
     </div>
